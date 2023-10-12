@@ -78,12 +78,18 @@ class SandSimulation:
 
     def setup(self):
         board_shape = input("").split(" ")
-        self.width, self.height = 10, 10
+        self.width, self.height = int(board_shape[0]), int(board_shape[1])
         self.create_blank_board()
-        self.create_wall(1, 2, 3, 4)
-        self.sand_inlet = Field(8, 8, field_type="inlet")
-
-        self.board[self.sand_inlet.x][self.sand_inlet.y] = self.sand_inlet
+        while True:
+            user_input = input("")
+            if user_input == "r":
+                wall_params = [int(i) for i in input().split(" ")]
+                self.create_wall(*wall_params)
+            elif user_input == "s":
+                start_x, start_y = input().split(" ")
+                self.sand_inlet = Field(int(start_x), int(start_y), field_type="inlet")
+                self.board[self.sand_inlet.x, self.sand_inlet.y] = self.sand_inlet
+                break
 
     def simulate(self, num_steps=None):
         if not self.board:
