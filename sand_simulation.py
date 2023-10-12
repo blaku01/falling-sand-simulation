@@ -17,9 +17,11 @@ class Field:
             return "#"
 
 class SandSimulation:
-    def __init__(self, width=None, height=None):
-        self.width = width
-        self.height = height
+    def __init__(self):
+        """Initialize the SandSimulation object.
+      
+        After initializing the SandSimulation object, users should call the 'setup' method to configure the board with the desired parameters.
+        """
         self.board = None
         self.sand_inlet = None
 
@@ -77,21 +79,62 @@ class SandSimulation:
         return self.current_field
 
     def setup(self):
+        """Set up the board configuration.
+
+        This method allows users to set up the board by specifying its dimensions, creating walls, defining an inlet, and starting the simulation.
+
+        Usage:
+            1. Enter the board dimensions as space-separated integers, e.g., "10 10". (Width and height must be between 5 and 100)
+            2. To create a wall, type "r" followed by the wall parameters (start_x, start_y, end_x, end_y) as space-separated integers, e.g., "r" -> "1 1 4 4".
+            3. To define the inlet for sand particles, type "s" followed by the inlet position (start_x, start_y) as space-separated integers, e.g., "s" -> "5 0".
+            4. After setting up the board configuration, the simulation will start automatically.
+
+        Example:
+            >>> sand_sim = SandSimulation()
+            >>> sand_sim.setup()
+        """
         board_shape = input("").split(" ")
-        self.width, self.height = int(board_shape[0]), int(board_shape[1])
+        width, height = int(board_shape[0]), int(board_shape[1])
+        
+        if not (5 <= width <= 100 and 5 <= height <= 100):
+            raise ValueError("Width and height must be between 5 and 100 (inclusive).")
+
+        self.width, self.height = width, height
         self.create_blank_board()
         while True:
             user_input = input("")
             if user_input == "r":
                 wall_params = [int(i) for i in input().split(" ")]
-                self.create_wall(*wall_params)
+                if len(wall_params) != 4:
+                    raise ValueError("Wall parameters must consist of four integers.")
+                start_x, start_y, end_x, end_y = wall_params
+                if not (0 <= start_x < self.width and 0 <= start_y < self.height and
+                        0 <= end_x < self.width and 0 <= end_y < self.height):
+                    raise ValueError("Wall parameters must be within valid bounds.")
+                self.create_wall(start_x, start_y, end_x, end_y)
             elif user_input == "s":
-                start_x, start_y = input().split(" ")
-                self.sand_inlet = Field(int(start_x), int(start_y), field_type="inlet")
+                inlet_params = [int(i) for i in input().split(" ")]
+                if len(inlet_params) != 2:
+                    raise ValueError("Inlet parameters must consist of two integers.")
+                start_x, start_y = inlet_params
+                if not (0 <= start_x < self.width and 0 <= start_y < self.height):
+                    raise ValueError("Inlet parameters must be within valid bounds.")
+                self.sand_inlet = Field(start_x, start_y, field_type="inlet")
                 self.board[self.sand_inlet.x, self.sand_inlet.y] = self.sand_inlet
                 break
 
     def simulate(self, num_steps=None):
+        """Simulate the behavior of sand particles on the board.
+
+        This method simulates the movement of sand particles on the board. If the `setup` method hasn't been called before, it will be called automatically to configure the board with default values.
+
+        Args:
+            num_steps (int, optional): The number of simulation steps to perform. If not specified, the simulation will run until no further sand particles can move.
+
+        Example:
+            >>> sand_sim = SandSimulation()
+            >>> sand_sim.simulate()  # Calls the setup method automatically if not already called before.
+        """
         if not self.board:
             self.setup()
         iters = 0
