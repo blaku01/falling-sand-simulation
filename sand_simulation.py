@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Field:
     def __init__(self, x=None, y=None, field_type="air"):
         self.x = x
@@ -16,18 +17,20 @@ class Field:
         elif self.type == "wall":
             return "#"
 
+
 class SandSimulation:
     def __init__(self):
         """Initialize the SandSimulation object.
-      
-        After initializing the SandSimulation object, users should call the 'setup' method to configure the board with the desired parameters.
+
+        After initializing the SandSimulation object, users should call the 'setup' method to
+        configure the board with the desired parameters.
         """
         self.board = None
         self.sand_inlet = None
 
     def draw_board(self):
         for row in np.flipud(self.board.T):
-            print(''.join(str(field) for field in row))
+            print("".join(str(field) for field in row))
         print()
 
     def simulate_sand_fall_step(self):
@@ -36,7 +39,10 @@ class SandSimulation:
         if y is None:
             return None
 
-        self.board[x][y], self.board[self.current_field.x][self.current_field.y] = self.board[self.current_field.x][self.current_field.y], self.board[x][y]
+        self.board[x][y], self.board[self.current_field.x][self.current_field.y] = (
+            self.board[self.current_field.x][self.current_field.y],
+            self.board[x][y],
+        )
         self.current_field.x, self.current_field.y = x, y
         return x, y
 
@@ -55,15 +61,9 @@ class SandSimulation:
 
         if self.board[field.x][new_y].type == "air":
             new_x = field.x
-        elif (
-            field.x + 1 < self.width
-            and self.board[field.x + 1][new_y].type == "air"
-        ):
+        elif field.x + 1 < self.width and self.board[field.x + 1][new_y].type == "air":
             new_x = field.x + 1
-        elif (
-            field.x - 1 >= 0
-            and self.board[field.x - 1][new_y].type == "air"
-        ):
+        elif field.x - 1 >= 0 and self.board[field.x - 1][new_y].type == "air":
             new_x = field.x - 1
         else:
             return None, None
@@ -71,7 +71,9 @@ class SandSimulation:
         return new_x, new_y
 
     def create_new_sand_particle(self):
-        x, y = self.check_fields_under(Field(self.sand_inlet.x, self.sand_inlet.y, field_type="sand"))
+        x, y = self.check_fields_under(
+            Field(self.sand_inlet.x, self.sand_inlet.y, field_type="sand")
+        )
         if y is None:
             return
         self.current_field = Field(x, y, field_type="sand")
@@ -95,7 +97,7 @@ class SandSimulation:
         """
         board_shape = input("").split(" ")
         width, height = int(board_shape[0]), int(board_shape[1])
-        
+
         if not (5 <= width <= 100 and 5 <= height <= 100):
             raise ValueError("Width and height must be between 5 and 100 (inclusive).")
 
@@ -108,8 +110,12 @@ class SandSimulation:
                 if len(wall_params) != 4:
                     raise ValueError("Wall parameters must consist of four integers.")
                 start_x, start_y, end_x, end_y = wall_params
-                if not (0 <= start_x < self.width and 0 <= start_y < self.height and
-                        0 <= end_x < self.width and 0 <= end_y < self.height):
+                if not (
+                    0 <= start_x < self.width
+                    and 0 <= start_y < self.height
+                    and 0 <= end_x < self.width
+                    and 0 <= end_y < self.height
+                ):
                     raise ValueError("Wall parameters must be within valid bounds.")
                 self.create_wall(start_x, start_y, end_x, end_y)
             elif user_input == "s":
@@ -158,13 +164,14 @@ class SandSimulation:
         width = end_x - start_x + 1
         height = end_y - start_y + 1
         wall_matrix = wall(np.arange(width * height).reshape(width, height))
-        self.board[start_x:end_x + 1, start_y:end_y + 1] = wall_matrix
+        self.board[start_x : end_x + 1, start_y : end_y + 1] = wall_matrix
 
     def create_blank_board(self):
         matrix = np.empty((self.height, self.width), dtype=object)
         field = np.vectorize(lambda x: Field())
         matrix[:] = field(np.arange(self.width * self.height).reshape(self.height, self.width))
         self.board = matrix
+
 
 if __name__ == "__main__":
     sand_sim = SandSimulation()
